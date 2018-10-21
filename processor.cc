@@ -32,7 +32,7 @@ bool Match(const LazyRE2 &re, absl::string_view source, size_t size) {
 }
 
 template <bool accept_string, typename T>
-bool ConsumeUntil(absl::string_view source, size_t *size, const T &condition) {
+void ConsumeUntil(absl::string_view source, size_t *size, const T &condition) {
   *size = 0;
   while (*size < source.size() && !Match(condition, source, *size)) {
     if (accept_string) {
@@ -49,7 +49,6 @@ bool ConsumeUntil(absl::string_view source, size_t *size, const T &condition) {
     }
     ++*size;
   }
-  return true;
 }
 
 template <size_t N>
