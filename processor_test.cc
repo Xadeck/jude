@@ -35,18 +35,30 @@ private:
   }
 };
 
-TEST_F(ProcessorTest, Text) {
-  ASSERT_EQ(Process(R"LT(some text)LT"), R"LUA(_s([[some text]]))LUA");
-}
-
-TEST_F(ProcessorTest, Expression) {
+TEST_F(ProcessorTest, ExpressionsWork) {
   ASSERT_EQ(Process(R"LT(some {{3+4}} expression)LT"),
             R"LUA(_s([[some ]])_e(3+4)_s([[ expression]]))LUA");
+  ASSERT_EQ(Process(R"LT({{expression}} at start)LT"),
+            R"LUA(_e(expression)_s([[ at start]]))LUA");
+  ASSERT_EQ(Process(R"LT(expression {{at end}})LT"),
+            R"LUA(_s([[expression ]])_e(at end))LUA");
+  ASSERT_EQ(Process(R"LT({{with "string \" }}" expression}})LT"),
+            R"LUA(_e(with "string \" }}" expression))LUA");
+  ASSERT_EQ(Process(R"LT({{with 'string \' }}' expression}})LT"),
+            R"LUA(_e(with 'string \' }}' expression))LUA");
 }
 
-TEST_F(ProcessorTest, Statement) {
-  ASSERT_EQ(Process(R"LT(some {%x=4%} statement)LT"),
-            R"LUA(_s([[some ]]) x=4 _s([[ statement]]))LUA");
+TEST_F(ProcessorTest, StatementsWork) {
+  ASSERT_EQ(Process(R"LT(some {%3+4%} statement)LT"),
+            R"LUA(_s([[some ]]) 3+4 _s([[ statement]]))LUA");
+  ASSERT_EQ(Process(R"LT({%statement%} at start)LT"),
+            R"LUA( statement _s([[ at start]]))LUA");
+  ASSERT_EQ(Process(R"LT(statement {%at end%})LT"),
+            R"LUA(_s([[statement ]]) at end )LUA");
+  ASSERT_EQ(Process(R"LT({%with "string \" %}" statement%})LT"),
+            R"LUA( with "string \" %}" statement )LUA");
+  ASSERT_EQ(Process(R"LT({%with 'string \' %}' statement%})LT"),
+            R"LUA( with 'string \' %}' statement )LUA");
 }
 
 TEST_F(ProcessorTest, WhitespacesAreStripped) {
