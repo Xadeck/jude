@@ -13,6 +13,7 @@ constexpr char kClosingExpression[] = {"}}"};
 LazyRE2 kOpeningStatement = {R"RE({%-?|\n *{%-)RE"};
 LazyRE2 kClosingStatement = {R"RE(-%} *\n|-?%})RE"};
 LazyRE2 kOpeningExpressionOrStatement = {R"RE({{|{%-?|\n *{%-)RE"};
+LazyRE2 kClosingExpressionOrStatement = {R"RE(}}|-%} *\n|-?%})RE"};
 
 bool Consume(absl::string_view *source, const char prefix[]) {
   return absl::ConsumePrefix(source, prefix);
@@ -79,18 +80,14 @@ const char *Processor::Read(lua_State *L, size_t *size) {
       if (Consume(&source_, kOpeningExpression)) {
         return To(Mode::EXPRESSION), Literal("_e(", size);
       }
-      if (Consume(&source_, kClosingExpression)) {
-        continue;
-      }
       if (Consume(&source_, kOpeningStatement)) {
         return To(Mode::STATEMENT), Literal(" ", size);
       }
-      if (Consume(&source_, kClosingStatement)) {
+      if (Consume(&source_, kClosingExpressionOrStatement)) {
         continue;
       }
       return To(Mode::TEXT), Literal("_s([[", size);
     }
-    *size = 0;
     return nullptr;
   case Mode::TEXT:
     ConsumeUntil<false>(source_, size, kOpeningExpressionOrStatement);
