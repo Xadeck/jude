@@ -8,7 +8,7 @@
 namespace xdk {
 namespace ltemplate {
 
-class Processor {
+class Processor final {
 public:
   explicit Processor(absl::string_view source);
 
@@ -24,13 +24,13 @@ private:
     STATEMENT = 5,
     STATEMENT_END = 6,
   };
-  bool Consume(const char prefix[]);
-  bool Consume(const LazyRE2 &re);
+  bool TryConsume(const char prefix[]);
+  bool TryConsume(const LazyRE2 &re);
   bool Match(size_t size, const char prefix[]) const;
-  bool Match(size_t size, const LazyRE2 &re) const;
+  bool Match(size_t size, const LazyRE2 &re, absl::string_view *match = nullptr,
+             int n_match = 0) const;
+  const char *Consume(size_t size);
 
-  const char *Consumed(size_t size);
-  void To(Mode mode);
   const char *Read(lua_State *L, size_t *size);
   void ReadCharOrString(size_t *size) const;
 
