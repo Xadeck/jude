@@ -1,7 +1,6 @@
 #include "xdk/ltemplate/processor.h"
 #include "absl/strings/match.h"
 #include "absl/strings/strip.h"
-#include "re2/re2.h"
 #include <iostream>
 
 namespace xdk {
@@ -14,55 +13,10 @@ LazyRE2 kOpeningStatement = {R"RE({%-?|\n *{%-)RE"};
 LazyRE2 kClosingStatement = {R"RE(-%} *\n|-?%})RE"};
 LazyRE2 kOpeningExpressionOrStatement = {R"RE({{|{%-?|\n *{%-)RE"};
 LazyRE2 kClosingExpressionOrStatement = {R"RE(}}|-%} *\n|-?%})RE"};
+// The follow-up matches strings with escaped quotes.
+// See https://regex101.com/r/tAsbx5/1 for details.
+LazyRE2 kString = {R"RE(\\["']|"(?:\\"|.)*?["\n]|'(?:\\'|.)*?['\n])RE"};
 
-bool Consume(absl::string_view *source, const char prefix[]) {
-  return absl::ConsumePrefix(source, prefix);
-}
-
-bool Consume(absl::string_view *source, const LazyRE2 &re) {
-  return RE2::Consume(source, *re);
-}
-
-bool Match(const char prefix[], absl::string_view source, size_t size) {
-  return absl::StartsWith(source.substr(size), prefix);
-}
-
-bool Match(const LazyRE2 &re, absl::string_view source, size_t size) {
-  return re->Match(source, size, source.size(), RE2::ANCHOR_START, nullptr, 0);
-}
-
-template <typename T>
-void ConsumeUntil(absl::string_view source, size_t *size, const T &condition) {
-  *size = 0;
-  while (*size < source.size() && !Match(condition, source, *size)) {
-    ++*size;
-  }
-}
-
-template <typename T>
-void ConsumeCharAndStringUntil(absl::string_view source, size_t *size,
-                               const T &condition) {
-  *size = 0;
-  while (*size < source.size() && !Match(condition, source, *size)) {
-    const char delimiter = source[*size];
-    if (delimiter == '\'' || delimiter == '"') {
-      while (++*size < source.size() && source[*size] != delimiter) {
-        // TODO: handle the case of precending escaped backslash.
-        if (source[*size] == '\\' &&     //
-            *size + 1 < source.size() && //
-            source[*size + 1] == delimiter) {
-          *size += 2;
-        }
-      }
-    }
-    ++*size;
-  }
-  // This captures when a string is unterminated by an escaped delimiter.
-  // TODO: this is a sign the algorithm above should be rewritten.
-  if (*size > source.size()) {
-    *size = source.size();
-  }
-}
 template <size_t N>
 const char *Literal(const char (&literal)[N], size_t *size) {
   *size = N - 1;
@@ -72,6 +26,25 @@ const char *Literal(const char (&literal)[N], size_t *size) {
 } // namespace
 
 Processor::Processor(absl::string_view source) : source_(source) {}
+
+bool Processor::Match(size_t size, const char prefix[]) const {
+  return size >= source_.size() || //
+         absl::StartsWith(source_.substr(size), prefix);
+}
+
+bool Processor::Match(size_t size, const LazyRE2 &re) const {
+  return size >= source_.size() || //
+         re->Match(source_, size, source_.size(), RE2::ANCHOR_START, nullptr,
+                   0);
+}
+
+bool Processor::Consume(const char prefix[]) {
+  return absl::ConsumePrefix(&source_, prefix);
+}
+
+bool Processor::Consume(const LazyRE2 &re) {
+  return RE2::Consume(&source_, *re);
+}
 
 const char *Processor::Read(lua_State *L, void *data, size_t *size) {
   return reinterpret_cast<Processor *>(data)->Read(L, size);
@@ -88,33 +61,49 @@ const char *Processor::Read(lua_State *L, size_t *size) {
   switch (mode_) {
   case Mode::BEGIN:
     while (!source_.empty()) {
-      if (Consume(&source_, kOpeningExpression)) {
+      if (Consume(kOpeningExpression)) {
         return To(Mode::EXPRESSION), Literal("_e(", size);
       }
-      if (Consume(&source_, kOpeningStatement)) {
+      if (Consume(kOpeningStatement)) {
         return To(Mode::STATEMENT), Literal(" ", size);
       }
-      if (Consume(&source_, kClosingExpressionOrStatement)) {
+      if (Consume(kClosingExpressionOrStatement)) {
         continue;
       }
       return To(Mode::TEXT), Literal("_s([[", size);
     }
     return nullptr;
   case Mode::TEXT:
-    ConsumeUntil(source_, size, kOpeningExpressionOrStatement);
+    for (*size = 0; !Match(*size, kOpeningExpressionOrStatement);) {
+      ++*size;
+    }
     return To(Mode::TEXT_END), Consumed(*size);
   case Mode::TEXT_END:
     return To(Mode::BEGIN), Literal("]])", size);
   case Mode::EXPRESSION:
-    ConsumeCharAndStringUntil(source_, size, kClosingExpression);
+    for (*size = 0; !Match(*size, kClosingExpression);) {
+      ReadCharOrString(size);
+    }
     return To(Mode::EXPRESSION_END), Consumed(*size);
   case Mode::EXPRESSION_END:
     return To(Mode::BEGIN), Literal(")", size);
   case Mode::STATEMENT:
-    ConsumeCharAndStringUntil(source_, size, kClosingStatement);
+    for (*size = 0; !Match(*size, kClosingStatement);) {
+      ReadCharOrString(size);
+    }
     return To(Mode::STATEMENT_END), Consumed(*size);
   case Mode::STATEMENT_END:
     return To(Mode::BEGIN), Literal(" ", size);
+  }
+}
+
+void Processor::ReadCharOrString(size_t *size) const {
+  absl::string_view match;
+  if (kString->Match(source_, *size, source_.size(), RE2::ANCHOR_START, &match,
+                     1)) {
+    *size += match.size();
+  } else {
+    ++*size;
   }
 }
 

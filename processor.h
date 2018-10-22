@@ -2,7 +2,7 @@
 #define XDK_LTEMPLATE_PROCESSOR_H
 
 #include "absl/strings/string_view.h"
-#include "absl/types/optional.h"
+#include "re2/re2.h"
 #include <lua.hpp>
 
 namespace xdk {
@@ -24,13 +24,18 @@ private:
     STATEMENT = 5,
     STATEMENT_END = 6,
   };
+  bool Consume(const char prefix[]);
+  bool Consume(const LazyRE2 &re);
+  bool Match(size_t size, const char prefix[]) const;
+  bool Match(size_t size, const LazyRE2 &re) const;
+
   const char *Consumed(size_t size);
   void To(Mode mode);
   const char *Read(lua_State *L, size_t *size);
+  void ReadCharOrString(size_t *size) const;
 
   absl::string_view source_;
   Mode mode_ = Mode::BEGIN;
-  absl::optional<char> string_delimiter_;
 };
 
 } // namespace ltemplate

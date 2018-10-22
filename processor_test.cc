@@ -44,6 +44,9 @@ TEST_F(ProcessorTest, ExpressionsWork) {
             R"LUA(_e(expression)_s([[ at start]]))LUA");
   ASSERT_EQ(Process(R"LT(expression {{at end}})LT"),
             R"LUA(_s([[expression ]])_e(at end))LUA");
+}
+
+TEST_F(ProcessorTest, StringsInExpressionsWork) {
   ASSERT_EQ(Process(R"LT({{with "string \" }}" expression}})LT"),
             R"LUA(_e(with "string \" }}" expression))LUA");
   ASSERT_EQ(Process(R"LT({{with 'string \' }}' expression}})LT"),
@@ -57,6 +60,9 @@ TEST_F(ProcessorTest, StatementsWork) {
             R"LUA( statement _s([[ at start]]))LUA");
   ASSERT_EQ(Process(R"LT(statement {%at end%})LT"),
             R"LUA(_s([[statement ]]) at end )LUA");
+}
+
+TEST_F(ProcessorTest, StringsInStatementsWork) {
   ASSERT_EQ(Process(R"LT({%with "string \" %}" statement%})LT"),
             R"LUA( with "string \" %}" statement )LUA");
   ASSERT_EQ(Process(R"LT({%with 'string \' %}' statement%})LT"),
