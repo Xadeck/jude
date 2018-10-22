@@ -33,3 +33,6 @@
 
 # Bazel working directories
 bazel-*
+
+# YouCompleteMe configuration
+.ycm_extra_conf.py
