@@ -35,6 +35,8 @@ private:
   }
 };
 
+TEST_F(ProcessorTest, EmptyStringWorks) { ASSERT_EQ(Process(""), ""); }
+
 TEST_F(ProcessorTest, ExpressionsWork) {
   ASSERT_EQ(Process(R"LT(some {{3+4}} expression)LT"),
             R"LUA(_s([[some ]])_e(3+4)_s([[ expression]]))LUA");
