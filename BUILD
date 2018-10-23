@@ -2,6 +2,7 @@ cc_library(
     name = "processor",
     srcs = ["processor.cc"],
     hdrs = ["processor.h"],
+    copts = ["-Werror"],
     include_prefix = "xdk/ltemplate",
     deps = [
         "@com_google_absl//absl/strings",
