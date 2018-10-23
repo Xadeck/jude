@@ -23,19 +23,22 @@ private:
     EXPRESSION_END = 4,
     STATEMENT = 5,
     STATEMENT_END = 6,
+    STRING = 7,
   };
   bool TryConsume(const char prefix[]);
   bool TryConsume(const LazyRE2 &re);
+  bool Match(size_t size, char prefix) const;
   bool Match(size_t size, const char prefix[]) const;
   bool Match(size_t size, const LazyRE2 &re, absl::string_view *match = nullptr,
              int n_match = 0) const;
   const char *Consume(size_t size);
 
   const char *Read(lua_State *L, size_t *size);
-  void ReadCharOrString(size_t *size) const;
 
   absl::string_view source_;
   Mode mode_ = Mode::BEGIN;
+  char delimiter_ = 0;
+  Mode from_ = Mode::BEGIN;
 };
 
 } // namespace ltemplate

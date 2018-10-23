@@ -86,18 +86,18 @@ TEST_F(ProcessorTest, UnfinishedExpressionIsClosed) {
   EXPECT_EQ(Process(R"(unfinished {{expression)"),
             R"LUA(_s([[unfinished ]])_e(expression))LUA");
   EXPECT_EQ(Process(R"(unfinished {{expression with "string)"),
-            R"LUA(_s([[unfinished ]])_e(expression with "string))LUA");
+            R"LUA(_s([[unfinished ]])_e(expression with "string)LUA");
   EXPECT_EQ(Process(R"(unfinished {{expression with "string\")"),
-            R"LUA(_s([[unfinished ]])_e(expression with "string\"))LUA");
+            R"LUA(_s([[unfinished ]])_e(expression with "string\")LUA");
 }
 
 TEST_F(ProcessorTest, UnfinishedStatementIsClosed) {
   EXPECT_EQ(Process(R"(unfinished {%statement)"),
             R"LUA(_s([[unfinished ]]) statement )LUA");
   EXPECT_EQ(Process(R"(unfinished {%statement with "string)"),
-            R"LUA(_s([[unfinished ]]) statement with "string )LUA");
+            R"LUA(_s([[unfinished ]]) statement with "string)LUA");
   EXPECT_EQ(Process(R"(unfinished {%statement with "string\")"),
-            R"LUA(_s([[unfinished ]]) statement with "string\" )LUA");
+            R"LUA(_s([[unfinished ]]) statement with "string\")LUA");
 }
 
 } // namespace

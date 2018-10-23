@@ -13,9 +13,6 @@ LazyRE2 kOpeningStatement = {R"RE({%-?|\n *{%-)RE"};
 LazyRE2 kClosingStatement = {R"RE(-%} *\n|-?%})RE"};
 LazyRE2 kOpeningExpressionOrStatement = {R"RE({{|{%-?|\n *{%-)RE"};
 LazyRE2 kClosingExpressionOrStatement = {R"RE(}}|-%} *\n|-?%})RE"};
-// The follow-up matches strings with escaped quotes.
-// See https://regex101.com/r/tAsbx5/1 for details.
-LazyRE2 kString = {R"RE(\\["']|"(?:\\"|.)*?["\n]|'(?:\\'|.)*?['\n])RE"};
 
 template <size_t N>
 const char *Produce(const char (&literal)[N], size_t *size) {
@@ -23,12 +20,18 @@ const char *Produce(const char (&literal)[N], size_t *size) {
   return literal;
 }
 
+bool IsQuote(char c) { return c == '"' || c == '\''; }
+
 } // namespace
 
 Processor::Processor(absl::string_view source) : source_(source) {}
 
+bool Processor::Match(size_t size, char prefix) const {
+  return size >= source_.size() || source_[size] == prefix;
+}
+
 bool Processor::Match(size_t size, const char prefix[]) const {
-  return size >= source_.size() || //
+  return size >= source_.size() ||
          absl::StartsWith(source_.substr(size), prefix);
 }
 
@@ -79,28 +82,37 @@ const char *Processor::Read(lua_State *L, size_t *size) {
   case Mode::TEXT_END:
     return mode_ = Mode::BEGIN, Produce("]])", size);
   case Mode::EXPRESSION:
-    for (*size = 0; !Match(*size, kClosingExpression);) {
-      ReadCharOrString(size);
+    for (*size = 0; !Match(*size, kClosingExpression); ++*size) {
+      if (IsQuote(delimiter_ = source_[*size])) {
+        return mode_ = Mode::STRING,     //
+               from_ = Mode::EXPRESSION, //
+               Consume(++*size);
+      }
     }
     return mode_ = Mode::EXPRESSION_END, Consume(*size);
   case Mode::EXPRESSION_END:
     return mode_ = Mode::BEGIN, Produce(")", size);
   case Mode::STATEMENT:
-    for (*size = 0; !Match(*size, kClosingStatement);) {
-      ReadCharOrString(size);
+    for (*size = 0; !Match(*size, kClosingStatement); ++*size) {
+      if (IsQuote(delimiter_ = source_[*size])) {
+        return mode_ = Mode::STRING,    //
+               from_ = Mode::STATEMENT, //
+               Consume(++*size);
+      }
     }
     return mode_ = Mode::STATEMENT_END, Consume(*size);
   case Mode::STATEMENT_END:
     return mode_ = Mode::BEGIN, Produce(" ", size);
-  }
-}
-
-void Processor::ReadCharOrString(size_t *size) const {
-  absl::string_view match;
-  if (Match(*size, kString, &match, 1)) {
-    *size += match.size();
-  } else {
-    ++*size;
+  case Mode::STRING:
+    for (*size = 0; *size < source_.size(); ++*size) {
+      if (source_[*size] == delimiter_) {
+        return mode_ = from_, Consume(++*size);
+      }
+      if (source_[*size] == '\\' && *size + 1 < source_.size()) {
+        ++*size;
+      }
+    }
+    return mode_ = from_, Consume(*size);
   }
 }
 
