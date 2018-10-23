@@ -60,13 +60,13 @@ const char *Reader::Read(lua_State *L, size_t *size) {
   switch (mode_) {
   case Mode::BEGIN:
     if (TryConsume(kOpeningExpression)) {
-      return mode_ = Mode::EXPRESSION, Produce("_e(", size);
+      return mode_ = Mode::EXPRESSION, Produce("_o(", size);
     }
     if (TryConsume(kOpeningStatement)) {
       return mode_ = Mode::STATEMENT, Produce(" ", size);
     }
     if (!source_.empty()) {
-      return mode_ = Mode::TEXT, Produce("_s([[", size);
+      return mode_ = Mode::TEXT, Produce("_o([[", size);
     }
     return nullptr;
   case Mode::TEXT:

@@ -16,7 +16,7 @@ git_repository(
 
 git_repository(
     name = "xdk_lua",
-    commit = "e105224",
+    commit = "0a3aa8a",
     remote = "https://github.com/Xadeck/lua.git",
 )
 

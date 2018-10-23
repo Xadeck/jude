@@ -29,3 +29,28 @@ cc_test(
         "@xdk_lua//:state",
     ],
 )
+
+cc_library(
+    name = "ltemplate",
+    srcs = ["ltemplate.cc"],
+    hdrs = ["ltemplate.h"],
+    include_prefix = "xdk/ltemplate",
+    deps = [
+        ":reader",
+        "@xdk_lua//:sandbox",
+        "@xdk_lua//:stack",
+    ],
+)
+
+cc_test(
+    name = "ltemplate_test",
+    srcs = [
+        "ltemplate_test.cc",
+    ],
+    deps = [
+        ":ltemplate",
+        "@com_google_googletest//:gtest_main",
+        "@xdk_lua//:stack",
+        "@xdk_lua//:state",
+    ],
+)
