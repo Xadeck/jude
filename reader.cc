@@ -1,4 +1,4 @@
-#include "xdk/ltemplate/processor.h"
+#include "xdk/ltemplate/reader.h"
 #include "absl/base/macros.h"
 #include "absl/strings/match.h"
 #include "absl/strings/strip.h"
@@ -23,41 +23,41 @@ bool IsQuote(char c) { return c == '"' || c == '\''; }
 
 } // namespace
 
-Processor::Processor(absl::string_view source) : source_(source) {}
+Reader::Reader(const char *data, size_t size) : source_(data, size) {}
 
-bool Processor::Match(size_t size, char prefix) const {
+bool Reader::Match(size_t size, char prefix) const {
   return size >= source_.size() || source_[size] == prefix;
 }
 
-bool Processor::Match(size_t size, const char prefix[]) const {
+bool Reader::Match(size_t size, const char prefix[]) const {
   return size >= source_.size() ||
          absl::StartsWith(source_.substr(size), prefix);
 }
 
-bool Processor::Match(size_t size, const LazyRE2 &re, absl::string_view *match,
-                      int n_match) const {
+bool Reader::Match(size_t size, const LazyRE2 &re, absl::string_view *match,
+                   int n_match) const {
   return size >= source_.size() || re->Match(source_, size, source_.size(),
                                              RE2::ANCHOR_START, match, n_match);
 }
 
-bool Processor::TryConsume(const char prefix[]) {
+bool Reader::TryConsume(const char prefix[]) {
   return absl::ConsumePrefix(&source_, prefix);
 }
 
-bool Processor::TryConsume(const LazyRE2 &re) {
+bool Reader::TryConsume(const LazyRE2 &re) {
   return RE2::Consume(&source_, *re);
 }
 
-const char *Processor::Read(lua_State *L, void *data, size_t *size) {
-  return reinterpret_cast<Processor *>(data)->Read(L, size);
+const char *Reader::Read(lua_State *L, void *data, size_t *size) {
+  return reinterpret_cast<Reader *>(data)->Read(L, size);
 }
 
-const char *Processor::Consume(size_t size) {
+const char *Reader::Consume(size_t size) {
   const char *read = source_.data();
   source_.remove_prefix(size);
   return read;
 }
-const char *Processor::Read(lua_State *L, size_t *size) {
+const char *Reader::Read(lua_State *L, size_t *size) {
   switch (mode_) {
   case Mode::BEGIN:
     if (TryConsume(kOpeningExpression)) {

@@ -1,5 +1,5 @@
-#ifndef XDK_LTEMPLATE_PROCESSOR_H
-#define XDK_LTEMPLATE_PROCESSOR_H
+#ifndef XDK_LTEMPLATE_READER_H
+#define XDK_LTEMPLATE_READER_H
 
 #include "absl/strings/string_view.h"
 #include "re2/re2.h"
@@ -8,9 +8,9 @@
 namespace xdk {
 namespace ltemplate {
 
-class Processor final {
+class Reader final {
 public:
-  explicit Processor(absl::string_view source);
+  Reader(const char *data, size_t size);
 
   static const char *Read(lua_State *L, void *data, size_t *size);
 

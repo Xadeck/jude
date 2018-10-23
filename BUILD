@@ -4,11 +4,12 @@ COPTS = [
 ]
 
 cc_library(
-    name = "processor",
-    srcs = ["processor.cc"],
-    hdrs = ["processor.h"],
+    name = "reader",
+    srcs = ["reader.cc"],
+    hdrs = ["reader.h"],
     copts = COPTS,
     include_prefix = "xdk/ltemplate",
+    visibility = ["//visibility:private"],
     deps = [
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:optional",
@@ -18,11 +19,11 @@ cc_library(
 )
 
 cc_test(
-    name = "processor_test",
-    srcs = ["processor_test.cc"],
+    name = "reader_test",
+    srcs = ["reader_test.cc"],
     copts = COPTS,
     deps = [
-        ":processor",
+        ":reader",
         "@com_google_googletest//:gtest_main",
         "@xdk_lua//:stack",
         "@xdk_lua//:state",
