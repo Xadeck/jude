@@ -1,8 +1,13 @@
+COPTS = [
+    "-Wall",
+    "-Werror",
+]
+
 cc_library(
     name = "processor",
     srcs = ["processor.cc"],
     hdrs = ["processor.h"],
-    copts = ["-Werror"],
+    copts = COPTS,
     include_prefix = "xdk/ltemplate",
     deps = [
         "@com_google_absl//absl/strings",
@@ -15,7 +20,7 @@ cc_library(
 cc_test(
     name = "processor_test",
     srcs = ["processor_test.cc"],
-    copts = ["-Werror"],
+    copts = COPTS,
     deps = [
         ":processor",
         "@com_google_googletest//:gtest_main",
