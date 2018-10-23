@@ -71,8 +71,10 @@ const char *Processor::Read(lua_State *L, size_t *size) {
     }
     return nullptr;
   case Mode::TEXT:
-    for (*size = 0; !Match(*size, kOpeningExpressionOrStatement);) {
-      ++*size;
+    for (*size = 0; !Match(*size, kOpeningExpressionOrStatement); ++*size) {
+      if (source_[*size] == '\\' && *size + 1 < source_.size()) {
+        ++*size;
+      }
     }
     return mode_ = Mode::TEXT_END, Consume(*size);
   case Mode::TEXT_END:

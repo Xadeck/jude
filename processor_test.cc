@@ -47,6 +47,11 @@ TEST_F(ProcessorTest, StrayRPercentBraceArePreserved) {
             R"LUA(_s([[some %} in a text]]))LUA");
 }
 
+TEST_F(ProcessorTest, EscapedLBracesArePreserved) {
+  ASSERT_EQ(Process(R"LT(some \{{ in a text)LT"),
+            R"LUA(_s([[some \{{ in a text]]))LUA");
+}
+
 TEST_F(ProcessorTest, ExpressionsWork) {
   ASSERT_EQ(Process(R"LT(some {{3+4}} expression)LT"),
             R"LUA(_s([[some ]])_e(3+4)_s([[ expression]]))LUA");
