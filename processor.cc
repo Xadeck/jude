@@ -11,7 +11,6 @@ constexpr char kOpeningExpression[] = {"{{"};
 constexpr char kClosingExpression[] = {"}}"};
 LazyRE2 kOpeningStatement = {R"RE({%-?|\n *{%-)RE"};
 LazyRE2 kClosingStatement = {R"RE(-%} *\n|-?%})RE"};
-LazyRE2 kOpeningExpressionOrStatement = {R"RE({{|{%-?|\n *{%-)RE"};
 
 template <size_t N>
 const char *Produce(const char (&literal)[N], size_t *size) {
@@ -71,7 +70,9 @@ const char *Processor::Read(lua_State *L, size_t *size) {
     }
     return nullptr;
   case Mode::TEXT:
-    for (*size = 0; !Match(*size, kOpeningExpressionOrStatement); ++*size) {
+    for (*size = 0;
+         !Match(*size, kOpeningExpression) && !Match(*size, kOpeningStatement);
+         ++*size) {
       if (source_[*size] == '\\' && *size + 1 < source_.size()) {
         ++*size;
       }
