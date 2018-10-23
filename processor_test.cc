@@ -67,9 +67,14 @@ TEST_F(ProcessorTest, StringsInExpressionsWork) {
   // An escaped backslash does not escape the following double quote.
   ASSERT_EQ(Process(R"LT({{with "string \" }}\\" expression}})LT"),
             R"LUA(_e(with "string \" }}\\" expression))LUA");
+  // Double quoted string can be at begin/end of expression.
+  ASSERT_EQ(Process(R"LT({{ "string" }})LT"), R"LUA(_e( "string" ))LUA");
+  ASSERT_EQ(Process(R"LT({{"string"}})LT"), R"LUA(_e("string"))LUA");
   // Same thing with single quoted string.
   ASSERT_EQ(Process(R"LT({{with 'string \' }}' expression}})LT"),
             R"LUA(_e(with 'string \' }}' expression))LUA");
+  ASSERT_EQ(Process(R"LT({{ 'string' }})LT"), R"LUA(_e( 'string' ))LUA");
+  ASSERT_EQ(Process(R"LT({{'string'}})LT"), R"LUA(_e('string'))LUA");
 }
 
 TEST_F(ProcessorTest, StatementsWork) {
@@ -87,9 +92,14 @@ TEST_F(ProcessorTest, StringsInStatementsWork) {
   // An escaped backslash does not escape the following double quote.
   ASSERT_EQ(Process(R"LT({%with "string \" %}\\" statement%})LT"),
             R"LUA( with "string \" %}\\" statement )LUA");
+  // Single quoted string can be at begin/end of statement.
+  ASSERT_EQ(Process(R"LT({% "string" %})LT"), R"LUA(  "string"  )LUA");
+  ASSERT_EQ(Process(R"LT({%"string"%})LT"), R"LUA( "string" )LUA");
   // Same thing with single quoted string.
   ASSERT_EQ(Process(R"LT({%with 'string \' %}\\' statement%})LT"),
             R"LUA( with 'string \' %}\\' statement )LUA");
+  ASSERT_EQ(Process(R"LT({% 'string' %})LT"), R"LUA(  'string'  )LUA");
+  ASSERT_EQ(Process(R"LT({%'string'%})LT"), R"LUA( 'string' )LUA");
 }
 
 TEST_F(ProcessorTest, WhitespacesAreStripped) {
@@ -106,20 +116,20 @@ TEST_F(ProcessorTest, WhitespacesAreStripped) {
 }
 
 TEST_F(ProcessorTest, UnfinishedExpressionIsClosed) {
-  EXPECT_EQ(Process(R"(unfinished {{expression)"),
+  EXPECT_EQ(Process(R"LT(unfinished {{expression)LT"),
             R"LUA(_s([[unfinished ]])_e(expression))LUA");
-  EXPECT_EQ(Process(R"(unfinished {{expression with "string)"),
+  EXPECT_EQ(Process(R"LT(unfinished {{expression with "string)LT"),
             R"LUA(_s([[unfinished ]])_e(expression with "string)LUA");
-  EXPECT_EQ(Process(R"(unfinished {{expression with "string\")"),
+  EXPECT_EQ(Process(R"LT(unfinished {{expression with "string\")LT"),
             R"LUA(_s([[unfinished ]])_e(expression with "string\")LUA");
 }
 
 TEST_F(ProcessorTest, UnfinishedStatementIsClosed) {
-  EXPECT_EQ(Process(R"(unfinished {%statement)"),
+  EXPECT_EQ(Process(R"LT(unfinished {%statement)LT"),
             R"LUA(_s([[unfinished ]]) statement )LUA");
-  EXPECT_EQ(Process(R"(unfinished {%statement with "string)"),
+  EXPECT_EQ(Process(R"LT(unfinished {%statement with "string)LT"),
             R"LUA(_s([[unfinished ]]) statement with "string)LUA");
-  EXPECT_EQ(Process(R"(unfinished {%statement with "string\")"),
+  EXPECT_EQ(Process(R"LT(unfinished {%statement with "string\")LT"),
             R"LUA(_s([[unfinished ]]) statement with "string\")LUA");
 }
 

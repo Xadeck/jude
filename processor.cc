@@ -1,4 +1,5 @@
 #include "xdk/ltemplate/processor.h"
+#include "absl/base/macros.h"
 #include "absl/strings/match.h"
 #include "absl/strings/strip.h"
 #include <iostream>
@@ -88,7 +89,10 @@ const char *Processor::Read(lua_State *L, size_t *size) {
                Consume(++*size);
       }
     }
-    return mode_ = Mode::EXPRESSION_END, Consume(*size);
+    if (*size || source_.empty()) {
+      return mode_ = Mode::EXPRESSION_END, Consume(*size);
+    }
+    ABSL_FALLTHROUGH_INTENDED;
   case Mode::EXPRESSION_END:
     TryConsume(kClosingExpression);
     return mode_ = Mode::BEGIN, Produce(")", size);
@@ -100,7 +104,10 @@ const char *Processor::Read(lua_State *L, size_t *size) {
                Consume(++*size);
       }
     }
-    return mode_ = Mode::STATEMENT_END, Consume(*size);
+    if (*size || source_.empty()) {
+      return mode_ = Mode::STATEMENT_END, Consume(*size);
+    }
+    ABSL_FALLTHROUGH_INTENDED;
   case Mode::STATEMENT_END:
     TryConsume(kClosingStatement);
     return mode_ = Mode::BEGIN, Produce(" ", size);
