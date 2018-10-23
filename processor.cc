@@ -12,7 +12,6 @@ constexpr char kClosingExpression[] = {"}}"};
 LazyRE2 kOpeningStatement = {R"RE({%-?|\n *{%-)RE"};
 LazyRE2 kClosingStatement = {R"RE(-%} *\n|-?%})RE"};
 LazyRE2 kOpeningExpressionOrStatement = {R"RE({{|{%-?|\n *{%-)RE"};
-LazyRE2 kClosingExpressionOrStatement = {R"RE(}}|-%} *\n|-?%})RE"};
 
 template <size_t N>
 const char *Produce(const char (&literal)[N], size_t *size) {
@@ -61,16 +60,13 @@ const char *Processor::Consume(size_t size) {
 const char *Processor::Read(lua_State *L, size_t *size) {
   switch (mode_) {
   case Mode::BEGIN:
-    while (!source_.empty()) {
-      if (TryConsume(kOpeningExpression)) {
-        return mode_ = Mode::EXPRESSION, Produce("_e(", size);
-      }
-      if (TryConsume(kOpeningStatement)) {
-        return mode_ = Mode::STATEMENT, Produce(" ", size);
-      }
-      if (TryConsume(kClosingExpressionOrStatement)) {
-        continue;
-      }
+    if (TryConsume(kOpeningExpression)) {
+      return mode_ = Mode::EXPRESSION, Produce("_e(", size);
+    }
+    if (TryConsume(kOpeningStatement)) {
+      return mode_ = Mode::STATEMENT, Produce(" ", size);
+    }
+    if (!source_.empty()) {
       return mode_ = Mode::TEXT, Produce("_s([[", size);
     }
     return nullptr;
@@ -91,6 +87,7 @@ const char *Processor::Read(lua_State *L, size_t *size) {
     }
     return mode_ = Mode::EXPRESSION_END, Consume(*size);
   case Mode::EXPRESSION_END:
+    TryConsume(kClosingExpression);
     return mode_ = Mode::BEGIN, Produce(")", size);
   case Mode::STATEMENT:
     for (*size = 0; !Match(*size, kClosingStatement); ++*size) {
@@ -102,6 +99,7 @@ const char *Processor::Read(lua_State *L, size_t *size) {
     }
     return mode_ = Mode::STATEMENT_END, Consume(*size);
   case Mode::STATEMENT_END:
+    TryConsume(kClosingStatement);
     return mode_ = Mode::BEGIN, Produce(" ", size);
   case Mode::STRING:
     for (*size = 0; *size < source_.size(); ++*size) {
