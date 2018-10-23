@@ -57,8 +57,12 @@ TEST_F(ProcessorTest, ExpressionsWork) {
 }
 
 TEST_F(ProcessorTest, StringsInExpressionsWork) {
-  ASSERT_EQ(Process(R"LT({{with "string \" }}" expression}})LT"),
-            R"LUA(_e(with "string \" }}" expression))LUA");
+  // Inside a double quoted string, }} does not stop expression.
+  // An escaped double quote does not stop the string.
+  // An escaped backslash does not escape the following double quote.
+  ASSERT_EQ(Process(R"LT({{with "string \" }}\\" expression}})LT"),
+            R"LUA(_e(with "string \" }}\\" expression))LUA");
+  // Same thing with single quoted string.
   ASSERT_EQ(Process(R"LT({{with 'string \' }}' expression}})LT"),
             R"LUA(_e(with 'string \' }}' expression))LUA");
 }
@@ -73,10 +77,14 @@ TEST_F(ProcessorTest, StatementsWork) {
 }
 
 TEST_F(ProcessorTest, StringsInStatementsWork) {
-  ASSERT_EQ(Process(R"LT({%with "string \" %}" statement%})LT"),
-            R"LUA( with "string \" %}" statement )LUA");
-  ASSERT_EQ(Process(R"LT({%with 'string \' %}' statement%})LT"),
-            R"LUA( with 'string \' %}' statement )LUA");
+  // Inside a double quoted string, %} does not stop statement.
+  // An escaped double quote does not stop the string.
+  // An escaped backslash does not escape the following double quote.
+  ASSERT_EQ(Process(R"LT({%with "string \" %}\\" statement%})LT"),
+            R"LUA( with "string \" %}\\" statement )LUA");
+  // Same thing with single quoted string.
+  ASSERT_EQ(Process(R"LT({%with 'string \' %}\\' statement%})LT"),
+            R"LUA( with 'string \' %}\\' statement )LUA");
 }
 
 TEST_F(ProcessorTest, WhitespacesAreStripped) {
