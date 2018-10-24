@@ -38,28 +38,15 @@ int _o(lua_State *L) {
 
 namespace ltemplate {
 
-struct Sandbox {
-  Sandbox(lua_State *L) : L(L), sandbox(lua::newsandbox(L)) {}
-
-  ~Sandbox() { lua::closesandbox(L, sandbox); }
-
-  operator int() const { return sandbox; }
-
-  lua_State *const L;
-  const int sandbox;
-};
-
-int dostring(lua_State *L, const char *data, size_t size) {
-  Sandbox sandbox(L);
+int dostring(lua_State *L, const char *data, size_t size, const char *name) {
   lua_newtable(L); // BLOCKS
 
   Reader reader(data, size);
-  // TODO: pass a correct name.
-  if (int error = lua_load(L, Reader::Read, &reader, "name", "t")) {
+  if (int error = lua_load(L, Reader::Read, &reader, name, "t")) {
     lua_pop(L, -2); // BLOCKS
     return error;
   }
-  lua::getsandbox(L, sandbox);
+  lua::Sandbox sandbox(L, -3);
 
   lua_pushliteral(L, "_o");
   lua_pushvalue(L, -4); // BLOCKS

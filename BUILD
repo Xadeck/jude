@@ -25,8 +25,8 @@ cc_test(
     deps = [
         ":reader",
         "@com_google_googletest//:gtest_main",
-        "@xdk_lua//:stack",
-        "@xdk_lua//:state",
+        "@xdk_lua//xdk/lua:stack",
+        "@xdk_lua//xdk/lua:state",
     ],
 )
 
@@ -37,8 +37,8 @@ cc_library(
     include_prefix = "xdk/ltemplate",
     deps = [
         ":reader",
-        "@xdk_lua//:sandbox",
-        "@xdk_lua//:stack",
+        "@xdk_lua//xdk/lua:sandbox",
+        "@xdk_lua//xdk/lua:stack",
     ],
 )
 
@@ -50,7 +50,7 @@ cc_test(
     deps = [
         ":ltemplate",
         "@com_google_googletest//:gtest_main",
-        "@xdk_lua//:stack",
-        "@xdk_lua//:state",
+        "@xdk_lua//xdk/lua:stack",
+        "@xdk_lua//xdk/lua:state",
     ],
 )

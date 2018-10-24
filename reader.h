@@ -3,7 +3,7 @@
 
 #include "absl/strings/string_view.h"
 #include "re2/re2.h"
-#include <lua.hpp>
+#include "xdk/lua/lua.hpp"
 
 namespace xdk {
 namespace ltemplate {

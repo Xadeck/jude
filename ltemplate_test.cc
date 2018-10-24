@@ -18,8 +18,8 @@ TEST(LTemplateTest, Works) {
   lua_newtable(L);
 
   std::string source = R"LT(this is {{2+1, "(three)"}} words)LT";
-  ASSERT_EQ(dostring(L, source.data(), source.size()), LUA_OK)
-      << lua::Stack::Debug(L);
+  ASSERT_EQ(dostring(L, source.data(), source.size(), "test"), LUA_OK)
+      << lua::Stack(L);
   ASSERT_EQ(lua_gettop(L), 2);
   ASSERT_TRUE(lua_istable(L, -1));
   lua_getfield(L, 2, "_");
