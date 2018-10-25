@@ -9,22 +9,17 @@
 
 namespace xdk {
 namespace {
-void stringify(lua_State *L, int index) {
-  index = lua_absindex(L, index);
-  if (lua_isnil(L, index)) {
-    lua_pushstring(L, "");
-    lua_replace(L, index);
-  }
-}
 
 int _o(lua_State *L) {
   lua_pushliteral(L, "_");
   lua_rawget(L, lua_upvalueindex(1));
-  stringify(L, -1);
   lua_insert(L, 1);
   // Convert nil values to empty string.
-  for (int i = 1; i <= lua_gettop(L); ++i) {
-    stringify(L, i);
+  for (int index = 1; index <= lua_gettop(L); ++index) {
+    if (lua_isnil(L, index)) {
+      lua_pushstring(L, "");
+      lua_replace(L, index);
+    }
   }
   // Use concat to support arguments with a __concat metamethod.
   lua_pushstring(L, "");
