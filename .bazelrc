@@ -1,0 +1,2 @@
+build --define=absl=1
+test --define=absl=1

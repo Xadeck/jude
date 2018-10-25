@@ -47,6 +47,7 @@ cc_test(
     deps = [
         ":ltemplate",
         "@com_google_googletest//:gtest_main",
+        "@xdk_lua//xdk/lua:matchers",
         "@xdk_lua//xdk/lua:stack",
         "@xdk_lua//xdk/lua:state",
     ],
