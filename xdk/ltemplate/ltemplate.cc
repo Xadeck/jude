@@ -41,8 +41,7 @@ int dostring(lua_State *L, const char *data, size_t size, const char *name) {
     lua_pop(L, -2); // BLOCKS
     return error;
   }
-  lua::Sandbox sandbox(L, -3);
-
+  lua::newsandbox(L, -3);
   lua_pushliteral(L, "_o");
   lua_pushvalue(L, -4); // BLOCKS
   lua_pushcclosure(L, &_o, 1);
