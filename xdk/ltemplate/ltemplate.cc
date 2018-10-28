@@ -38,7 +38,7 @@ int dostring(lua_State *L, const char *data, size_t size, const char *name) {
 
   Reader reader(data, size);
   if (int error = lua_load(L, Reader::Read, &reader, name, "t")) {
-    lua_pop(L, -2); // BLOCKS
+    lua_pop(L, 1); // BLOCKS
     return error;
   }
   lua::newsandbox(L, -3);
@@ -49,7 +49,7 @@ int dostring(lua_State *L, const char *data, size_t size, const char *name) {
 
   lua_setupvalue(L, -2, 1);
   if (int error = lua_pcall(L, 0, 0, 0)) {
-    lua_pop(L, -2); // BLOCKS
+    lua_pop(L, 1); // BLOCKS
     return error;
   }
   return LUA_OK;
