@@ -115,6 +115,12 @@ TEST_F(ReaderTest, WhitespacesAreStripped) {
   second line]])  x=2  _o([[  third line]]))LUA");
 }
 
+TEST_F(ReaderTest, WhitespacesStrippingCornerCases) {
+  EXPECT_EQ(Read("{%--%}"), "  ");
+  EXPECT_EQ(Read("\n{%--%}"), "  ");
+  EXPECT_EQ(Read("{%--%}\n"), "  ");
+}
+
 TEST_F(ReaderTest, UnfinishedExpressionIsClosed) {
   EXPECT_EQ(Read(R"LT(unfinished {{expression)LT"),
             R"LUA(_o([[unfinished ]])_o(expression))LUA");
