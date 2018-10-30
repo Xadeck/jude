@@ -33,8 +33,8 @@ cc_library(
     copts = COPTS,
     deps = [
         ":reader",
+        "@xdk_lua//xdk/lua:back",
         "@xdk_lua//xdk/lua:sandbox",
-        "@xdk_lua//xdk/lua:stack",
     ],
 )
 
