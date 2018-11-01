@@ -1,5 +1,9 @@
 load("//:WORKSPACE.bzl", "COPTS")
 
+package(
+    default_visibility = ["//visibility:public"],
+)
+
 cc_library(
     name = "reader",
     srcs = ["reader.cc"],
