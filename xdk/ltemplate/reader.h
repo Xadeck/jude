@@ -2,7 +2,6 @@
 #define XDK_LTEMPLATE_READER_H
 
 #include "absl/strings/string_view.h"
-#include "re2/re2.h"
 #include "xdk/lua/lua.hpp"
 
 namespace xdk {
@@ -26,11 +25,11 @@ private:
     STRING = 7,
   };
   bool TryConsume(const char prefix[]);
-  bool TryConsume(const LazyRE2 &re);
-  bool Match(size_t size, char prefix) const;
+  bool TryConsumeOpeningStatement();
+  bool TryConsumeClosingStatement();
   bool Match(size_t size, const char prefix[]) const;
-  bool Match(size_t size, const LazyRE2 &re, absl::string_view *match = nullptr,
-             int n_match = 0) const;
+  bool MatchOpeningStatement(size_t size) const;
+  bool MatchClosingStatement(size_t size) const;
   const char *Consume(size_t size);
 
   const char *Read(lua_State *L, size_t *size);
