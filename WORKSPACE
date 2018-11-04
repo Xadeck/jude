@@ -1,3 +1,5 @@
+workspace(name = "xdk_ltemplate")
+
 load("//:WORKSPACE.bzl", "dependencies")
 
 dependencies()
