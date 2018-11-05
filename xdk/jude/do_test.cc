@@ -17,6 +17,7 @@ using lua::IsNil;
 using lua::IsString;
 using lua::Stack;
 using ::testing::_;
+using ::testing::HasSubstr;
 using ::testing::StrEq;
 
 class DoTest : public ::testing::Test {
@@ -78,6 +79,25 @@ some more css.
               HasField("head", IsString("this is the header.\n")));
   EXPECT_THAT(Stack::Element(L, -1),
               HasField("css", IsString("some css.\nsome more css.\n")));
+}
+
+TEST_F(DoTest, LoadErrorIsReported) {
+  lua_newtable(L);
+  std::string source = "{% x = foo( %}";
+  int error = dostring(L, source.data(), source.size(), "test");
+  ASSERT_EQ(error, LUA_ERRSYNTAX);
+  EXPECT_THAT(Stack::Element(L, -1),
+              IsString(HasSubstr("unexpected symbol near <eof>")));
+}
+
+TEST_F(DoTest, CallErrorIsReported) {
+  lua_newtable(L);
+  std::string source = "{{ y .. 3 }}";
+  int error = dostring(L, source.data(), source.size(), "test");
+  ASSERT_EQ(error, LUA_ERRRUN);
+  EXPECT_THAT(
+      Stack::Element(L, -1),
+      IsString(HasSubstr("attempt to concatenate a nil value (global \'y\')")));
 }
 
 } // namespace
