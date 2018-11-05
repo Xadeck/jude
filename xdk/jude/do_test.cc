@@ -19,12 +19,12 @@ using lua::Stack;
 using ::testing::_;
 using ::testing::StrEq;
 
-class judeTest : public ::testing::Test {
+class DoTest : public ::testing::Test {
 protected:
   lua::State L;
 };
 
-TEST_F(judeTest, ExpressionsWork) {
+TEST_F(DoTest, ExpressionsWork) {
   lua_newtable(L);
 
   std::string source = R"LT(this is {{2+1, "(three)"}} words)LT";
@@ -34,7 +34,7 @@ TEST_F(judeTest, ExpressionsWork) {
               HasField("_", IsString("this is 3(three) words")));
 }
 
-TEST_F(judeTest, StatementsWork) {
+TEST_F(DoTest, StatementsWork) {
   lua_newtable(L);
 
   std::string source = R"LT({% x=3 %}the number {{ x }}.)LT";
@@ -43,7 +43,7 @@ TEST_F(judeTest, StatementsWork) {
   EXPECT_THAT(Stack::Element(L, -1), HasField("_", IsString("the number 3.")));
 }
 
-TEST_F(judeTest, EvaluationIsSandboxed) {
+TEST_F(DoTest, EvaluationIsSandboxed) {
   lua_newtable(L);
   lua_pushinteger(L, 5);
   lua_setfield(L, -2, "x");
@@ -55,7 +55,7 @@ TEST_F(judeTest, EvaluationIsSandboxed) {
   EXPECT_THAT(Stack::Element(L, -2), HasField("y", IsNil()));
 }
 
-TEST_F(judeTest, NamedBlocksWork) {
+TEST_F(DoTest, NamedBlocksWork) {
   lua_newtable(L);
   std::string source = R"LT(
 {%- beginblock('head') -%}
