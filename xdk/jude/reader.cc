@@ -1,11 +1,11 @@
-#include "xdk/ltemplate/reader.h"
+#include "xdk/jude/reader.h"
 #include "absl/base/macros.h"
 #include "absl/strings/match.h"
 #include "absl/strings/strip.h"
 #include "re2/re2.h"
 
 namespace xdk {
-namespace ltemplate {
+namespace jude {
 namespace {
 
 constexpr char kOpeningExpression[] = {"{{"};
@@ -130,5 +130,5 @@ const char *Reader::Read(lua_State *L, size_t *size) {
   }
 }
 
-} // namespace ltemplate
+} // namespace jude
 } // namespace xdk

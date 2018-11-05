@@ -1,4 +1,4 @@
-workspace(name = "xdk_ltemplate")
+workspace(name = "xdk_jude")
 
 load("//:WORKSPACE.bzl", "dependencies")
 

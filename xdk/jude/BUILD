@@ -31,9 +31,9 @@ cc_test(
 )
 
 cc_library(
-    name = "ltemplate",
-    srcs = ["ltemplate.cc"],
-    hdrs = ["ltemplate.h"],
+    name = "do",
+    srcs = ["do.cc"],
+    hdrs = ["do.h"],
     copts = COPTS,
     deps = [
         ":reader",
@@ -43,13 +43,11 @@ cc_library(
 )
 
 cc_test(
-    name = "ltemplate_test",
-    srcs = [
-        "ltemplate_test.cc",
-    ],
+    name = "do_test",
+    srcs = ["do_test.cc"],
     copts = COPTS,
     deps = [
-        ":ltemplate",
+        ":do",
         "@com_google_googletest//:gtest_main",
         "@xdk_lua//xdk/lua:matchers",
         "@xdk_lua//xdk/lua:stack",

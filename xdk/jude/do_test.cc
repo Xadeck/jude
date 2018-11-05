@@ -1,4 +1,4 @@
-#include "xdk/ltemplate/ltemplate.h"
+#include "xdk/jude/do.h"
 
 #include <string>
 
@@ -9,7 +9,7 @@
 #include "gtest/gtest.h"
 
 namespace xdk {
-namespace ltemplate {
+namespace jude {
 namespace {
 
 using lua::HasField;
@@ -19,12 +19,12 @@ using lua::Stack;
 using ::testing::_;
 using ::testing::StrEq;
 
-class LTemplateTest : public ::testing::Test {
+class judeTest : public ::testing::Test {
 protected:
   lua::State L;
 };
 
-TEST_F(LTemplateTest, ExpressionsWork) {
+TEST_F(judeTest, ExpressionsWork) {
   lua_newtable(L);
 
   std::string source = R"LT(this is {{2+1, "(three)"}} words)LT";
@@ -34,7 +34,7 @@ TEST_F(LTemplateTest, ExpressionsWork) {
               HasField("_", IsString("this is 3(three) words")));
 }
 
-TEST_F(LTemplateTest, StatementsWork) {
+TEST_F(judeTest, StatementsWork) {
   lua_newtable(L);
 
   std::string source = R"LT({% x=3 %}the number {{ x }}.)LT";
@@ -43,7 +43,7 @@ TEST_F(LTemplateTest, StatementsWork) {
   EXPECT_THAT(Stack::Element(L, -1), HasField("_", IsString("the number 3.")));
 }
 
-TEST_F(LTemplateTest, EvaluationIsSandboxed) {
+TEST_F(judeTest, EvaluationIsSandboxed) {
   lua_newtable(L);
   lua_pushinteger(L, 5);
   lua_setfield(L, -2, "x");
@@ -55,7 +55,7 @@ TEST_F(LTemplateTest, EvaluationIsSandboxed) {
   EXPECT_THAT(Stack::Element(L, -2), HasField("y", IsNil()));
 }
 
-TEST_F(LTemplateTest, NamedBlocksWork) {
+TEST_F(judeTest, NamedBlocksWork) {
   lua_newtable(L);
   std::string source = R"LT(
 {%- beginblock('head') -%}
@@ -81,5 +81,5 @@ some more css.
 }
 
 } // namespace
-} // namespace ltemplate
+} // namespace jude
 } // namespace xdk

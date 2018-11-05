@@ -1,10 +1,10 @@
-#ifndef XDK_LTEMPLATE_LTEMPLATE_H
-#define XDK_LTEMPLATE_LTEMPLATE_H
+#ifndef XDK_jude_DO_H
+#define XDK_jude_DO_H
 
 #include "xdk/lua/lua.hpp"
 
 namespace xdk {
-namespace ltemplate {
+namespace jude {
 
 // Expects a table on the stack, leaves it there.
 //
@@ -13,7 +13,7 @@ namespace ltemplate {
 // In case of error, pushes the error message.
 int dostring(lua_State *L, const char *data, size_t size, const char *name);
 
-} // namespace ltemplate
+} // namespace jude
 } // namespace xdk
 
 #endif

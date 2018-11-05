@@ -1,11 +1,11 @@
-#ifndef XDK_LTEMPLATE_READER_H
-#define XDK_LTEMPLATE_READER_H
+#ifndef XDK_JUDE_READER_H
+#define XDK_JUDE_READER_H
 
 #include "absl/strings/string_view.h"
 #include "xdk/lua/lua.hpp"
 
 namespace xdk {
-namespace ltemplate {
+namespace jude {
 
 class Reader final {
 public:
@@ -40,7 +40,7 @@ private:
   Mode from_ = Mode::BEGIN;
 };
 
-} // namespace ltemplate
+} // namespace jude
 } // namespace xdk
 
 #endif

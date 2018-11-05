@@ -1,10 +1,10 @@
-#include "xdk/ltemplate/ltemplate.h"
+#include "xdk/jude/do.h"
 
 #include <iostream>
 #include <string>
 
 #include "absl/strings/str_cat.h"
-#include "xdk/ltemplate/reader.h"
+#include "xdk/jude/reader.h"
 #include "xdk/lua/back.h"
 #include "xdk/lua/sandbox.h"
 
@@ -65,7 +65,7 @@ int endblock(lua_State *L) {
 
 } // namespace
 
-namespace ltemplate {
+namespace jude {
 
 int dostring(lua_State *L, const char *data, size_t size, const char *name) {
   lua_newtable(L); // BLOCKS
@@ -106,5 +106,5 @@ int dostring(lua_State *L, const char *data, size_t size, const char *name) {
   return LUA_OK;
 }
 
-} // namespace ltemplate
+} // namespace jude
 } // namespace xdk

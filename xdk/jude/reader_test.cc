@@ -1,4 +1,4 @@
-#include "xdk/ltemplate/reader.h"
+#include "xdk/jude/reader.h"
 
 #include "absl/strings/str_cat.h"
 #include "xdk/lua/stack.h"
@@ -8,7 +8,7 @@
 #include <string>
 
 namespace xdk {
-namespace ltemplate {
+namespace jude {
 namespace {
 
 using ::testing::ElementsAre;
@@ -140,5 +140,5 @@ TEST_F(ReaderTest, UnfinishedStatementIsClosed) {
 }
 
 } // namespace
-} // namespace ltemplate
+} // namespace jude
 } // namespace xdk
