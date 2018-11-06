@@ -2,7 +2,7 @@
 #include "absl/base/macros.h"
 #include "absl/strings/match.h"
 #include "absl/strings/strip.h"
-#include "re2/re2.h"
+#include <iostream>
 
 namespace xdk {
 namespace jude {
@@ -10,8 +10,6 @@ namespace {
 
 constexpr char kOpeningExpression[] = {"{{"};
 constexpr char kClosingExpression[] = {"}}"};
-LazyRE2 kOpeningStatement = {R"RE({%-?|\n *{%-)RE"};
-LazyRE2 kClosingStatement = {R"RE(-%} *\n|-?%})RE"};
 
 template <size_t N>
 const char *Produce(const char (&literal)[N], size_t *size) {
@@ -31,15 +29,16 @@ bool Reader::Match(size_t size, const char prefix[]) const {
 }
 
 bool Reader::MatchOpeningStatement(size_t size) const {
-  return size >= source_.size() ||
-         kOpeningStatement->Match(source_, size, source_.size(),
-                                  RE2::ANCHOR_START, nullptr, 0);
+  if (Match(size, "\n")) {
+    while (++size < source_.size() && source_[size] == ' ')
+      ;
+    return Match(size, "{%-");
+  }
+  return Match(size, "{%-") || Match(size, "{%");
 }
 
 bool Reader::MatchClosingStatement(size_t size) const {
-  return size >= source_.size() ||
-         kClosingStatement->Match(source_, size, source_.size(),
-                                  RE2::ANCHOR_START, nullptr, 0);
+  return Match(size, "-%}") || Match(size, "%}");
 }
 
 bool Reader::TryConsume(const char prefix[]) {
@@ -47,11 +46,32 @@ bool Reader::TryConsume(const char prefix[]) {
 }
 
 bool Reader::TryConsumeOpeningStatement() {
-  return RE2::Consume(&source_, *kOpeningStatement);
+  int size = 0;
+  if (absl::StartsWith(source_.substr(size), "\n")) {
+    while (++size < source_.size() && source_[size] == ' ')
+      ;
+    if (absl::StartsWith(source_.substr(size), "{%-")) {
+      source_ = source_.substr(size + 3);
+      return true;
+    };
+    return false;
+  }
+  return TryConsume("{%-") || TryConsume("{%");
 }
 
 bool Reader::TryConsumeClosingStatement() {
-  return RE2::Consume(&source_, *kClosingStatement);
+  int size = 0;
+  if (absl::StartsWith(source_.substr(size), "-%}")) {
+    size += 3;
+    while (size < source_.size() && source_[size] == ' ')
+      ;
+    if (size < source_.size() && source_[size] == '\n') {
+      ++size;
+    }
+    source_ = source_.substr(size);
+    return true;
+  }
+  return TryConsume("%}");
 }
 
 const char *Reader::Read(lua_State *L, void *data, size_t *size) {

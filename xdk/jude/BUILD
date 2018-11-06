@@ -13,7 +13,6 @@ cc_library(
     deps = [
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:optional",
-        "@com_google_re2//:re2",
         "@lua",
     ],
 )

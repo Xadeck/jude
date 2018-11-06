@@ -7,14 +7,6 @@ def dependencies():
         remote = "https://github.com/Xadeck/lua.git",
     )
 
-    # TODO: google re2 has not yet tagged the abseil branch so a known
-    # commit is used instead.
-    git_repository(
-        name = "com_google_re2",
-        commit = "30b555b",
-        remote = "https://github.com/google/re2.git",
-    )
-
 COPTS = [
     "-Wall",
     "-Werror",
