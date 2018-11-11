@@ -38,26 +38,24 @@ private:
 TEST_F(ReaderTest, EmptyStringWorks) { ASSERT_EQ(Read(""), ""); }
 
 TEST_F(ReaderTest, StrayRBracesArePreserved) {
-  ASSERT_EQ(Read(R"LT(some }} in a text)LT"),
-            R"LUA(_o([[some }} in a text]]))LUA");
+  ASSERT_EQ(Read(R"(some }} in a text)"), R"LUA(_o([[some }} in a text]]))LUA");
 }
 
 TEST_F(ReaderTest, StrayRPercentBraceArePreserved) {
-  ASSERT_EQ(Read(R"LT(some %} in a text)LT"),
-            R"LUA(_o([[some %} in a text]]))LUA");
+  ASSERT_EQ(Read(R"(some %} in a text)"), R"LUA(_o([[some %} in a text]]))LUA");
 }
 
 TEST_F(ReaderTest, EscapedLBracesArePreserved) {
-  ASSERT_EQ(Read(R"LT(some \{{ in a text)LT"),
+  ASSERT_EQ(Read(R"(some \{{ in a text)"),
             R"LUA(_o([[some \{{ in a text]]))LUA");
 }
 
 TEST_F(ReaderTest, ExpressionsWork) {
-  ASSERT_EQ(Read(R"LT(some {{3+4}} expression)LT"),
+  ASSERT_EQ(Read(R"(some {{3+4}} expression)"),
             R"LUA(_o([[some ]])_o(3+4)_o([[ expression]]))LUA");
-  ASSERT_EQ(Read(R"LT({{expression}} at start)LT"),
+  ASSERT_EQ(Read(R"({{expression}} at start)"),
             R"LUA(_o(expression)_o([[ at start]]))LUA");
-  ASSERT_EQ(Read(R"LT(expression {{at end}})LT"),
+  ASSERT_EQ(Read(R"(expression {{at end}})"),
             R"LUA(_o([[expression ]])_o(at end))LUA");
 }
 
@@ -65,24 +63,24 @@ TEST_F(ReaderTest, StringsInExpressionsWork) {
   // Inside a double quoted string, }} does not stop expression.
   // An escaped double quote does not stop the string.
   // An escaped backslash does not escape the following double quote.
-  ASSERT_EQ(Read(R"LT({{with "string \" }}\\" expression}})LT"),
+  ASSERT_EQ(Read(R"({{with "string \" }}\\" expression}})"),
             R"LUA(_o(with "string \" }}\\" expression))LUA");
   // Double quoted string can be at begin/end of expression.
-  ASSERT_EQ(Read(R"LT({{ "string" }})LT"), R"LUA(_o( "string" ))LUA");
-  ASSERT_EQ(Read(R"LT({{"string"}})LT"), R"LUA(_o("string"))LUA");
+  ASSERT_EQ(Read(R"({{ "string" }})"), R"LUA(_o( "string" ))LUA");
+  ASSERT_EQ(Read(R"({{"string"}})"), R"LUA(_o("string"))LUA");
   // Same thing with single quoted string.
-  ASSERT_EQ(Read(R"LT({{with 'string \' }}' expression}})LT"),
+  ASSERT_EQ(Read(R"({{with 'string \' }}' expression}})"),
             R"LUA(_o(with 'string \' }}' expression))LUA");
-  ASSERT_EQ(Read(R"LT({{ 'string' }})LT"), R"LUA(_o( 'string' ))LUA");
-  ASSERT_EQ(Read(R"LT({{'string'}})LT"), R"LUA(_o('string'))LUA");
+  ASSERT_EQ(Read(R"({{ 'string' }})"), R"LUA(_o( 'string' ))LUA");
+  ASSERT_EQ(Read(R"({{'string'}})"), R"LUA(_o('string'))LUA");
 }
 
 TEST_F(ReaderTest, StatementsWork) {
-  ASSERT_EQ(Read(R"LT(some {%3+4%} statement)LT"),
+  ASSERT_EQ(Read(R"(some {%3+4%} statement)"),
             R"LUA(_o([[some ]]) 3+4 _o([[ statement]]))LUA");
-  ASSERT_EQ(Read(R"LT({%statement%} at start)LT"),
+  ASSERT_EQ(Read(R"({%statement%} at start)"),
             R"LUA( statement _o([[ at start]]))LUA");
-  ASSERT_EQ(Read(R"LT(statement {%at end%})LT"),
+  ASSERT_EQ(Read(R"(statement {%at end%})"),
             R"LUA(_o([[statement ]]) at end )LUA");
 }
 
@@ -90,16 +88,16 @@ TEST_F(ReaderTest, StringsInStatementsWork) {
   // Inside a double quoted string, %} does not stop statement.
   // An escaped double quote does not stop the string.
   // An escaped backslash does not escape the following double quote.
-  ASSERT_EQ(Read(R"LT({%with "string \" %}\\" statement%})LT"),
+  ASSERT_EQ(Read(R"({%with "string \" %}\\" statement%})"),
             R"LUA( with "string \" %}\\" statement )LUA");
   // Single quoted string can be at begin/end of statement.
-  ASSERT_EQ(Read(R"LT({% "string" %})LT"), R"LUA(  "string"  )LUA");
-  ASSERT_EQ(Read(R"LT({%"string"%})LT"), R"LUA( "string" )LUA");
+  ASSERT_EQ(Read(R"({% "string" %})"), R"LUA(  "string"  )LUA");
+  ASSERT_EQ(Read(R"({%"string"%})"), R"LUA( "string" )LUA");
   // Same thing with single quoted string.
-  ASSERT_EQ(Read(R"LT({%with 'string \' %}\\' statement%})LT"),
+  ASSERT_EQ(Read(R"({%with 'string \' %}\\' statement%})"),
             R"LUA( with 'string \' %}\\' statement )LUA");
-  ASSERT_EQ(Read(R"LT({% 'string' %})LT"), R"LUA(  'string'  )LUA");
-  ASSERT_EQ(Read(R"LT({%'string'%})LT"), R"LUA( 'string' )LUA");
+  ASSERT_EQ(Read(R"({% 'string' %})"), R"LUA(  'string'  )LUA");
+  ASSERT_EQ(Read(R"({%'string'%})"), R"LUA( 'string' )LUA");
 }
 
 TEST_F(ReaderTest, WhitespacesAreStripped) {
@@ -122,20 +120,20 @@ TEST_F(ReaderTest, WhitespacesStrippingCornerCases) {
 }
 
 TEST_F(ReaderTest, UnfinishedExpressionIsClosed) {
-  EXPECT_EQ(Read(R"LT(unfinished {{expression)LT"),
+  EXPECT_EQ(Read(R"(unfinished {{expression)"),
             R"LUA(_o([[unfinished ]])_o(expression))LUA");
-  EXPECT_EQ(Read(R"LT(unfinished {{expression with "string)LT"),
+  EXPECT_EQ(Read(R"(unfinished {{expression with "string)"),
             R"LUA(_o([[unfinished ]])_o(expression with "string)LUA");
-  EXPECT_EQ(Read(R"LT(unfinished {{expression with "string\")LT"),
+  EXPECT_EQ(Read(R"(unfinished {{expression with "string\")"),
             R"LUA(_o([[unfinished ]])_o(expression with "string\")LUA");
 }
 
 TEST_F(ReaderTest, UnfinishedStatementIsClosed) {
-  EXPECT_EQ(Read(R"LT(unfinished {%statement)LT"),
+  EXPECT_EQ(Read(R"(unfinished {%statement)"),
             R"LUA(_o([[unfinished ]]) statement )LUA");
-  EXPECT_EQ(Read(R"LT(unfinished {%statement with "string)LT"),
+  EXPECT_EQ(Read(R"(unfinished {%statement with "string)"),
             R"LUA(_o([[unfinished ]]) statement with "string)LUA");
-  EXPECT_EQ(Read(R"LT(unfinished {%statement with "string\")LT"),
+  EXPECT_EQ(Read(R"(unfinished {%statement with "string\")"),
             R"LUA(_o([[unfinished ]]) statement with "string\")LUA");
 }
 

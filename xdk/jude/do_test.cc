@@ -37,7 +37,7 @@ TEST_F(DoTest, EmptySourceGivesEmptyTable) {
 TEST_F(DoTest, ExpressionsWork) {
   lua_newtable(L);
 
-  const std::string source = R"LT(this is {{2+1, "(three)"}} words)LT";
+  const std::string source = R"S(this is {{2+1, "(three)"}} words)S";
   ASSERT_EQ(dostring(L, source.data(), source.size(), "test"), LUA_OK)
       << Stack(L);
   EXPECT_THAT(Stack::Element(L, -1),
@@ -47,7 +47,7 @@ TEST_F(DoTest, ExpressionsWork) {
 TEST_F(DoTest, StatementsWork) {
   lua_newtable(L);
 
-  const std::string source = R"LT({% x=3 %}the number {{ x }}.)LT";
+  const std::string source = R"({% x=3 %}the number {{ x }}.)";
   ASSERT_EQ(dostring(L, source.data(), source.size(), "test"), LUA_OK)
       << Stack(L);
   EXPECT_THAT(Stack::Element(L, -1), HasField("_", IsString("the number 3.")));
@@ -58,7 +58,7 @@ TEST_F(DoTest, EvaluationIsSandboxed) {
   lua_pushinteger(L, 5);
   lua_setfield(L, -2, "x");
 
-  const std::string source = R"LT({% y=x-2 %}the number {{ y }}.)LT";
+  const std::string source = R"({% y=x-2 %}the number {{ y }}.)";
   ASSERT_EQ(dostring(L, source.data(), source.size(), "test"), LUA_OK)
       << Stack(L);
   EXPECT_THAT(Stack::Element(L, -1), HasField("_", IsString("the number 3.")));
@@ -67,7 +67,7 @@ TEST_F(DoTest, EvaluationIsSandboxed) {
 
 TEST_F(DoTest, NamedBlocksWork) {
   lua_newtable(L);
-  const std::string source = R"LT(
+  const std::string source = R"(
 {%- beginblock('head') -%}
 this is the header.
 {% endblock() -%}
@@ -79,7 +79,7 @@ some more text.
 {%- beginblock('css') -%}
 some more css.
 {% endblock() -%}
-)LT";
+)";
   ASSERT_EQ(dostring(L, source.data(), source.size(), "test"), LUA_OK)
       << Stack(L);
   EXPECT_THAT(Stack::Element(L, -1),
