@@ -25,10 +25,19 @@ protected:
   lua::State L;
 };
 
+TEST_F(DoTest, EmptySourceGivesEmptyTable) {
+  lua_newtable(L);
+
+  const std::string source = "";
+  ASSERT_EQ(dostring(L, source.data(), source.size(), "test"), LUA_OK)
+      << Stack(L);
+  EXPECT_THAT(Stack::Element(L, -1), HasField("_", IsNil()));
+}
+
 TEST_F(DoTest, ExpressionsWork) {
   lua_newtable(L);
 
-  std::string source = R"LT(this is {{2+1, "(three)"}} words)LT";
+  const std::string source = R"LT(this is {{2+1, "(three)"}} words)LT";
   ASSERT_EQ(dostring(L, source.data(), source.size(), "test"), LUA_OK)
       << Stack(L);
   EXPECT_THAT(Stack::Element(L, -1),
@@ -38,7 +47,7 @@ TEST_F(DoTest, ExpressionsWork) {
 TEST_F(DoTest, StatementsWork) {
   lua_newtable(L);
 
-  std::string source = R"LT({% x=3 %}the number {{ x }}.)LT";
+  const std::string source = R"LT({% x=3 %}the number {{ x }}.)LT";
   ASSERT_EQ(dostring(L, source.data(), source.size(), "test"), LUA_OK)
       << Stack(L);
   EXPECT_THAT(Stack::Element(L, -1), HasField("_", IsString("the number 3.")));
@@ -49,7 +58,7 @@ TEST_F(DoTest, EvaluationIsSandboxed) {
   lua_pushinteger(L, 5);
   lua_setfield(L, -2, "x");
 
-  std::string source = R"LT({% y=x-2 %}the number {{ y }}.)LT";
+  const std::string source = R"LT({% y=x-2 %}the number {{ y }}.)LT";
   ASSERT_EQ(dostring(L, source.data(), source.size(), "test"), LUA_OK)
       << Stack(L);
   EXPECT_THAT(Stack::Element(L, -1), HasField("_", IsString("the number 3.")));
@@ -58,7 +67,7 @@ TEST_F(DoTest, EvaluationIsSandboxed) {
 
 TEST_F(DoTest, NamedBlocksWork) {
   lua_newtable(L);
-  std::string source = R"LT(
+  const std::string source = R"LT(
 {%- beginblock('head') -%}
 this is the header.
 {% endblock() -%}
@@ -83,7 +92,7 @@ some more css.
 
 TEST_F(DoTest, LoadErrorIsReported) {
   lua_newtable(L);
-  std::string source = "{% x = foo( %}";
+  const std::string source = "{% x = foo( %}";
   int error = dostring(L, source.data(), source.size(), "test");
   ASSERT_EQ(error, LUA_ERRSYNTAX);
   EXPECT_THAT(Stack::Element(L, -1),
@@ -92,7 +101,7 @@ TEST_F(DoTest, LoadErrorIsReported) {
 
 TEST_F(DoTest, CallErrorIsReported) {
   lua_newtable(L);
-  std::string source = "{{ y .. 3 }}";
+  const std::string source = "{{ y .. 3 }}";
   int error = dostring(L, source.data(), source.size(), "test");
   ASSERT_EQ(error, LUA_ERRRUN);
   EXPECT_THAT(
