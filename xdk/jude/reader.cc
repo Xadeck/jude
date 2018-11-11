@@ -32,7 +32,7 @@ bool Reader::MatchOpeningStatement(size_t size) const {
   if (Match(size, "\n")) {
     while (++size < source_.size() && source_[size] == ' ')
       ;
-    return Match(size, "{%-");
+    return size < source_.size() && Match(size, "{%-");
   }
   return Match(size, "{%-") || Match(size, "{%");
 }

@@ -37,6 +37,11 @@ private:
 
 TEST_F(ReaderTest, EmptyStringWorks) { ASSERT_EQ(Read(""), ""); }
 
+TEST_F(ReaderTest, SingleCharWorks) {
+  ASSERT_EQ(Read("x"), "_o([[x]])");
+  ASSERT_EQ(Read("\n"), "_o([[\n]])");
+}
+
 TEST_F(ReaderTest, StrayRBracesArePreserved) {
   ASSERT_EQ(Read(R"(some }} in a text)"), R"LUA(_o([[some }} in a text]]))LUA");
 }
