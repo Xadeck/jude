@@ -142,6 +142,16 @@ TEST_F(ReaderTest, UnfinishedStatementIsClosed) {
             R"LUA(_o([[unfinished ]]) statement with "string\")LUA");
 }
 
+TEST_F(ReaderTest, LongStringWorks) {
+  // Check that ]] in regular text gets escaped.
+  EXPECT_THAT(Read(R"(some [[text]] in double brackets)"),
+              "_o([[some [[text]])_o(']]')_o([[ in double brackets]])");
+  // Check that long strings work in expression.
+  EXPECT_THAT(Read("{{ [[text]] }}"), "_o( [[text]] )");
+  // Check that long strings work in statement.
+  EXPECT_THAT(Read("{% x=[[text]] %}"), "  x=[[text]]  ");
+}
+
 } // namespace
 } // namespace jude
 } // namespace xdk

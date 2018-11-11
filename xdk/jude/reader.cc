@@ -10,6 +10,7 @@ namespace {
 
 constexpr char kOpeningExpression[] = {"{{"};
 constexpr char kClosingExpression[] = {"}}"};
+constexpr char kClosingLongString[] = {"]]"};
 
 template <size_t N>
 const char *Produce(const char (&literal)[N], size_t *size) {
@@ -35,6 +36,10 @@ bool Reader::MatchOpeningStatement(size_t size) const {
     return size < source_.size() && Match(size, "{%-");
   }
   return Match(size, "{%-") || Match(size, "{%");
+}
+
+bool Reader::MatchClosingLongString(size_t size) const {
+  return Match(size, "]]");
 }
 
 bool Reader::MatchClosingStatement(size_t size) const {
@@ -92,13 +97,17 @@ const char *Reader::Read(lua_State *L, size_t *size) {
     if (TryConsumeOpeningStatement()) {
       return mode_ = Mode::STATEMENT, Produce(" ", size);
     }
+    if (TryConsume(kClosingLongString)) {
+      return Produce("_o(']]')", size);
+    }
     if (!source_.empty()) {
       return mode_ = Mode::TEXT, Produce("_o([[", size);
     }
     return nullptr;
   case Mode::TEXT:
-    for (*size = 0;
-         !Match(*size, kOpeningExpression) && !MatchOpeningStatement(*size);
+    for (*size = 0; !Match(*size, kOpeningExpression) && //
+                    !MatchOpeningStatement(*size) &&     //
+                    !MatchClosingLongString(*size);
          ++*size) {
       if (source_[*size] == '\\' && *size + 1 < source_.size()) {
         ++*size;

@@ -30,6 +30,7 @@ private:
   bool Match(size_t size, const char prefix[]) const;
   bool MatchOpeningStatement(size_t size) const;
   bool MatchClosingStatement(size_t size) const;
+  bool MatchClosingLongString(size_t size) const;
   const char *Consume(size_t size);
 
   const char *Read(lua_State *L, size_t *size);

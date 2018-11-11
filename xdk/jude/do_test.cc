@@ -109,6 +109,33 @@ TEST_F(DoTest, CallErrorIsReported) {
       IsString(HasSubstr("attempt to concatenate a nil value (global \'y\')")));
 }
 
+TEST_F(DoTest, LongStringsAreHandledInText) {
+  lua_newtable(L);
+  const std::string source = "this is [[text]] in double brackets";
+  ASSERT_EQ(dostring(L, source.data(), source.size(), "test"), LUA_OK)
+      << Stack(L);
+  EXPECT_THAT(Stack::Element(L, -1),
+              HasField("_", IsString("this is [[text]] in double brackets")));
+}
+
+TEST_F(DoTest, LongStringsAreHandledInExpression) {
+  lua_newtable(L);
+  const std::string source = "this is {{ [[text]] }} in double brackets";
+  ASSERT_EQ(dostring(L, source.data(), source.size(), "test"), LUA_OK)
+      << Stack(L);
+  EXPECT_THAT(Stack::Element(L, -1),
+              HasField("_", IsString("this is text in double brackets")));
+}
+
+TEST_F(DoTest, LongStringsAreHandledInStatement) {
+  lua_newtable(L);
+  const std::string source = "{% x=[[text]] %}this is {{x}} in double brackets";
+  ASSERT_EQ(dostring(L, source.data(), source.size(), "test"), LUA_OK)
+      << Stack(L);
+  EXPECT_THAT(Stack::Element(L, -1),
+              HasField("_", IsString("this is text in double brackets")));
+}
+
 } // namespace
 } // namespace jude
 } // namespace xdk
