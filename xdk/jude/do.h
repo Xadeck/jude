@@ -11,7 +11,8 @@ namespace jude {
 // Returns LUA_OK if success.  Result is pushed on stack.
 //
 // In case of error, pushes the error message.
-int dostring(lua_State *L, const char *data, size_t size, const char *name);
+int dostring(lua_State *L, const char *data, size_t size,
+             const char *name) noexcept;
 
 } // namespace jude
 } // namespace xdk

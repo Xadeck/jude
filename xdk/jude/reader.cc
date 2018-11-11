@@ -21,7 +21,7 @@ bool IsQuote(char c) { return c == '"' || c == '\''; }
 
 } // namespace
 
-Reader::Reader(const char *data, size_t size) : source_(data, size) {}
+Reader::Reader(const char *data, size_t size) noexcept : source_(data, size) {}
 
 bool Reader::Match(size_t size, const char prefix[]) const {
   return size >= source_.size() ||
@@ -74,7 +74,7 @@ bool Reader::TryConsumeClosingStatement() {
   return TryConsume("%}");
 }
 
-const char *Reader::Read(lua_State *L, void *data, size_t *size) {
+const char *Reader::Read(lua_State *L, void *data, size_t *size) noexcept {
   return reinterpret_cast<Reader *>(data)->Read(L, size);
 }
 

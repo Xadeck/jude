@@ -9,9 +9,9 @@ namespace jude {
 
 class Reader final {
 public:
-  Reader(const char *data, size_t size);
+  Reader(const char *data, size_t size) noexcept;
 
-  static const char *Read(lua_State *L, void *data, size_t *size);
+  static const char *Read(lua_State *L, void *data, size_t *size) noexcept;
 
 private:
   enum class Mode {

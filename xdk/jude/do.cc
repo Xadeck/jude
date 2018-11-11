@@ -67,7 +67,8 @@ int endblock(lua_State *L) {
 
 namespace jude {
 
-int dostring(lua_State *L, const char *data, size_t size, const char *name) {
+int dostring(lua_State *L, const char *data, size_t size,
+             const char *name) noexcept {
   lua_newtable(L); // BLOCKS
   lua_newtable(L); // BLOCKS STACK
 
