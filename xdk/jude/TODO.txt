@@ -1,0 +1,2 @@
+support yield in dostring
+make _ for unammed block a parameter.

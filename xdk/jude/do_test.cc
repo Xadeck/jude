@@ -136,6 +136,34 @@ TEST_F(DoTest, LongStringsAreHandledInStatement) {
               HasField("_", IsString("this is text in double brackets")));
 }
 
+TEST_F(DoTest, NewlinesWork) {
+  lua_newtable(L);
+  const std::string source = R"(
+
+    this is a text
+    without any expression
+    or statement.)";
+  ASSERT_EQ(dostring(L, source.data(), source.size(), "test"), LUA_OK)
+      << Stack(L);
+  EXPECT_THAT(Stack::Element(L, -1), HasField("_", IsString(source)));
+}
+
+TEST_F(DoTest, LinesEndingWithExpressionWork) {
+  lua_newtable(L);
+  lua_pushnumber(L, 3);
+  lua_setfield(L, -2, "expression");
+  const std::string source = R"(
+    line ending with {{expression}}
+    other line.)";
+  ASSERT_EQ(dostring(L, source.data(), source.size(), "test"), LUA_OK)
+      << Stack(L);
+  // Lua long string eat the first newline if any.
+  EXPECT_THAT(Stack::Element(L, -1),
+              HasField("_", IsString("\n"
+                                     "    line ending with 3.0\n"
+                                     "    other line.")));
+}
+
 } // namespace
 } // namespace jude
 } // namespace xdk

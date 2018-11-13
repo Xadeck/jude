@@ -101,7 +101,9 @@ const char *Reader::Read(lua_State *L, size_t *size) {
       return Produce("_o(']]')", size);
     }
     if (!source_.empty()) {
-      return mode_ = Mode::TEXT, Produce("_o([[", size);
+      // Lua long strings eat the first newline, so always add one
+      // to preserve newlines that were in the source.
+      return mode_ = Mode::TEXT, Produce("_o([[\n", size);
     }
     return nullptr;
   case Mode::TEXT:
