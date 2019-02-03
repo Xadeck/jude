@@ -24,6 +24,7 @@ cc_test(
     deps = [
         ":reader",
         "@com_google_googletest//:gtest_main",
+        "@xdk_lua//xdk/lua:read",
         "@xdk_lua//xdk/lua:stack",
         "@xdk_lua//xdk/lua:state",
     ],

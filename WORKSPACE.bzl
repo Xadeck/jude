@@ -3,7 +3,7 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 def dependencies():
     git_repository(
         name = "xdk_lua",
-        commit = "35e9565",
+        commit = "bfbc064",
         remote = "https://github.com/Xadeck/lua.git",
     )
 

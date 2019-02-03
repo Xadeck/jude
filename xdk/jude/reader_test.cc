@@ -1,6 +1,7 @@
 #include "xdk/jude/reader.h"
 
 #include "absl/strings/str_cat.h"
+#include "xdk/lua/read.h"
 #include "xdk/lua/stack.h"
 #include "xdk/lua/state.h"
 #include "gmock/gmock.h"
@@ -17,22 +18,10 @@ class ReaderTest : public ::testing::Test {
 protected:
   std::string Read(absl::string_view source) {
     Reader reader(source.data(), source.size());
-    return Read(Reader::Read, L, &reader);
+    return lua::Read(Reader::Read, L, &reader);
   }
 
   xdk::lua::State L;
-
-private:
-  static std::string Read(lua_Reader reader, lua_State *L, void *data) {
-    std::string result;
-    size_t size;
-    while (const char *read = reader(L, data, &size)) {
-      absl::StrAppend(&result, absl::string_view(read, size));
-      if (!size)
-        break;
-    }
-    return result;
-  }
 };
 
 TEST_F(ReaderTest, EmptyStringWorks) { ASSERT_EQ(Read(""), ""); }

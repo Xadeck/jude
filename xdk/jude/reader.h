@@ -7,8 +7,22 @@
 namespace xdk {
 namespace jude {
 
+// Performs on the fly transformation of a Jude template into it's Lua program
+// equivalent. Used as a lua_Reader to load that program:
+//
+//   absl::string_view tpl = "some text {{x}}";
+//   Reader reader(tpl.data(), tpl.size());
+//   lua_load(L, Reader::Read, &reader, "tpl", "t"));
+//
+// This is equivalent to:
+//
+//   luaL_loadstring(L, "_o([[\nsome text ]])_o(x)");
+//
+// Caller can then lua_pcall the loaded chunks with whatever definition of the
+// _o function it wants, and setting up whatever environment it wants.
 class Reader final {
 public:
+  // Data must stay valid as long as the reader is being used.
   Reader(const char *data, size_t size) noexcept;
 
   static const char *Read(lua_State *L, void *data, size_t *size) noexcept;
