@@ -3,7 +3,6 @@
 #include <iostream>
 #include <string>
 
-#include "absl/strings/str_cat.h"
 #include "xdk/jude/reader.h"
 #include "xdk/lua/back.h"
 #include "xdk/lua/sandbox.h"
